@@ -206,7 +206,6 @@
     const downloadBtn = document.getElementById("downloadBtn");
     const cartContainer = document.getElementById("cartContainer");
 
-    let totalPrice = 0;
     let editIndex = -1;
 
     function calculatePrice() {
@@ -299,11 +298,21 @@
     weightSelect.addEventListener("change", calculatePrice);
 
     downloadBtn.addEventListener("click", () => {
-      html2canvas(cartContainer).then(canvas => {
+      const clone = cartContainer.cloneNode(true);
+      clone.style.maxHeight = "none";
+      clone.style.overflow = "visible";
+      clone.style.height = "auto";
+      clone.style.width = "100%";
+      clone.style.position = "absolute";
+      clone.style.top = "-9999px";
+      document.body.appendChild(clone);
+
+      html2canvas(clone, { scale: 2 }).then(canvas => {
         const link = document.createElement("a");
         link.download = "cart.png";
         link.href = canvas.toDataURL();
         link.click();
+        document.body.removeChild(clone);
       });
     });
 
