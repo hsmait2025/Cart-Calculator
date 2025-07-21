@@ -1,4 +1,5 @@
-const CACHE_NAME = "price-calc-cache-v2";
+const CACHE_NAME = "price-calc-cache-v3";
+
 const urlsToCache = [
   "./",
   "./index.html",
@@ -10,7 +11,10 @@ const urlsToCache = [
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      console.log("Caching app shell...");
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
@@ -26,6 +30,8 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(event.request).then(response =>
+      response || fetch(event.request)
+    )
   );
 });
