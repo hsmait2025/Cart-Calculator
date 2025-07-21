@@ -1,136 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <meta charset="UTF-8">
-  <title>Weight-Based Price Calculator & Cart</title>
+  <title>Weight-Based Price Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
-    padding: 15px;
-    margin: 0;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 15px;
+      margin: 0;
+    }
 
-  .container {
-    max-width: 700px;
-    margin: auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
-  h2, h3 {
-    text-align: center;
-    color: #333;
-  }
-
-  label {
-    display: block;
-    margin-top: 15px;
-    font-weight: bold;
-  }
-
-  input, select, button {
-    width: 100%;
-    padding: 12px;
-    font-size: 1em;
-    margin-top: 5px;
-    box-sizing: border-box;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-
-  button {
-    margin-top: 15px;
-    border: none;
-    cursor: pointer;
-  }
-
-  button:hover {
-    opacity: 0.9;
-  }
-
-  #result, #unitPrices {
-    margin-top: 15px;
-    font-size: 1.1em;
-    color: #006400;
-    text-align: center;
-  }
-
-  .cart {
-    margin-top: 30px;
-  }
-
-  .cart table {
-    width: 100%;
-    border-collapse: collapse;
-    overflow-x: auto;
-    display: block;
-  }
-
-  .cart th, .cart td {
-    padding: 10px;
-    border: 1px solid #ccc;
-    text-align: center;
-    min-width: 100px;
-  }
-
-  .cart-total {
-    text-align: right;
-    font-weight: bold;
-    margin-top: 10px;
-    font-size: 1.2em;
-  }
-
-  .small-btn {
-    padding: 6px 10px;
-    font-size: 0.9em;
-    margin: 0 2px;
-    border: none;
-    border-radius: 4px;
-  }
-
-  .edit-btn {
-    background: #ffc107;
-    color: #000;
-  }
-
-  .remove-btn {
-    background: #dc3545;
-    color: #fff;
-  }
-
-  .download-btn {
-    background: #28a745;
-    color: #fff;
-  }
-
-  @media screen and (max-width: 600px) {
     h2, h3 {
-      font-size: 1.3em;
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
     }
 
     input, select, button {
+      width: 100%;
+      padding: 12px;
       font-size: 1em;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
 
-    .cart-total {
-      font-size: 1em;
+    button {
+      margin-top: 15px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #result, #unitPrices {
+      margin-top: 15px;
+      font-size: 1.1em;
+      color: #006400;
+      text-align: center;
+    }
+
+    .cart {
+      margin-top: 30px;
     }
 
     .cart table {
-      font-size: 0.9em;
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
     }
-  }
-</style>
 
+    .cart th, .cart td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .cart-total {
+      text-align: right;
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+
+    .small-btn {
+      padding: 6px 10px;
+      font-size: 0.9em;
+      margin: 0 2px;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .edit-btn { background: #ffc107; color: #000; }
+    .remove-btn { background: #dc3545; color: #fff; }
+    .download-btn { background: #28a745; color: #fff; }
+
+    @media screen and (max-width: 600px) {
+      h2, h3 { font-size: 1.3em; }
+      input, select, button { font-size: 1em; }
+      .cart-total { font-size: 1em; }
+      .cart table { font-size: 0.9em; }
+    }
+  </style>
 </head>
+
 <body>
   <div class="container">
     <h2>Weight‑Based Price Calculator & Cart 🛒</h2>
@@ -291,15 +267,15 @@
         link.click();
       });
     });
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(() => console.log("✅ Service Worker Registered"))
+          .catch(err => console.error("Service Worker Error", err));
+      });
+    }
   </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log("✅ Service Worker Registered"))
-        .catch(err => console.error("Service Worker Error", err));
-    });
-  }
-</script>
 </body>
 </html>
