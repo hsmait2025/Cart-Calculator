@@ -2,170 +2,303 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Weight-Based Price Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#ffffff" />
+  <title>Weight Price Calculator & Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#007BFF" />
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
   <style>
-    /* Same optimized mobile-responsive styles as before... */
-    body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 15px; margin: 0; }
-    .container { max-width: 700px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    h2, h3 { text-align: center; color: #333; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    input, select, button { width: 100%; padding: 12px; font-size: 1em; margin-top: 5px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
-    button { margin-top: 15px; border: none; cursor: pointer; }
-    .cart table { width: 100%; border-collapse: collapse; overflow-x: auto; display: block; }
-    .cart th, .cart td { padding: 10px; border: 1px solid #ccc; text-align: center; min-width: 100px; }
-    .cart-total { text-align: right; font-weight: bold; margin-top: 10px; font-size: 1.2em; }
-    .small-btn { padding: 6px 10px; font-size: 0.9em; margin: 0 2px; border: none; border-radius: 4px; }
-    .edit-btn { background: #ffc107; color: #000; } .remove-btn { background: #dc3545; color: #fff; } .download-btn { background: #28a745; color: #fff; }
-    @media screen and (max-width: 600px) { .cart table { font-size: 0.9em; } }
+    :root {
+      --primary: #007BFF;
+      --background: #F4F6FC;
+      --text: #333;
+      --card-bg: #FFF;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px var(--shadow);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .input-group {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .input-group > div {
+      flex: 1;
+      min-width: 150px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: .9em;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1.5px solid #DDD;
+      border-radius: 5px;
+      font-size: 1em;
+      transition: border-color .2s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .price-info {
+      margin: 15px 0;
+      background: #F0F8FF;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+      font-size: 1em;
+    }
+    .price-info span {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background .2s ease;
+    }
+    .btn:hover {
+      background: #0056c6;
+    }
+    .cart-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #EEE;
+      text-align: center;
+    }
+    th {
+      background: var(--primary);
+      color: #FFF;
+      font-weight: 500;
+    }
+    .actions .btn-action {
+      padding: 6px 10px;
+      font-size: .9em;
+      margin: 0 2px;
+      border-radius: 5px;
+    }
+    .edit { background: #FFC107; color: #000; }
+    .remove { background: #DC3545; color: #FFF; }
+    .total {
+      text-align: right;
+      margin-top: 10px;
+      font-weight: 500;
+      font-size: 1.1em;
+    }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <h2>Weight-Based Price Calculator & Cart 🛒</h2>
-    <label>Item Name</label>
-    <input type="text" id="itemName" />
-    <label>Price per 1 Kg</label>
-    <input type="number" id="pricePerKg" />
-    <label>Select Weight</label>
-    <select id="weightSelect">
-      <option value="">-- Choose weight --</option>
-      <option value="5">5 Kg</option><option value="2">2 Kg</option><option value="1">1 Kg</option>
-      <option value="0.75">0.750 Kg</option><option value="0.6">0.600 Kg</option><option value="0.5">0.500 Kg</option>
-      <option value="0.4">0.400 Kg</option><option value="0.3">0.300 Kg</option><option value="0.25">0.250 Kg</option>
-      <option value="0.2">0.200 Kg</option><option value="0.1">0.100 Kg</option><option value="0.05">0.050 Kg</option>
-      <option value="0.02">0.020 Kg</option><option value="0.01">0.010 Kg</option>
-    </select>
-    <div id="result">💡 Enter details to see price</div>
-    <div id="unitPrices"></div>
-    <button id="addBtn">Add to Cart ➕</button>
-    <button id="downloadBtn" class="download-btn">Download Cart as JPG 📷</button>
-    <div class="cart" id="cartContainer">
-      <h3>Cart</h3>
+    <h2>Weight Price Calculator & Cart</h2>
+
+    <div class="input-group">
+      <div>
+        <label>Item Name</label>
+        <input type="text" id="itemName" placeholder="e.g. Sugar" />
+      </div>
+      <div>
+        <label>Price per 1 Kg (₹)</label>
+        <input type="number" id="pricePerKg" placeholder="100" />
+      </div>
+      <div>
+        <label>Select Weight</label>
+        <select id="weightSelect">
+          <option value="">Choose weight</option>
+          <option value="5">5 Kg</option>
+          <option value="2">2 Kg</option>
+          <option value="1">1 Kg</option>
+          <option value="0.75">0.750 Kg</option>
+          <option value="0.6">0.600 Kg</option>
+          <option value="0.5">0.500 Kg</option>
+          <option value="0.4">0.400 Kg</option>
+          <option value="0.3">0.300 Kg</option>
+          <option value="0.25">0.250 Kg</option>
+          <option value="0.2">0.200 Kg</option>
+          <option value="0.1">0.100 Kg</option>
+          <option value="0.05">0.050 Kg</option>
+          <option value="0.02">0.020 Kg</option>
+          <option value="0.01">0.010 Kg</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="price-info" id="priceInfo">
+      💡 Enter details to see price breakdown
+    </div>
+
+    <div class="buttons">
+      <button class="btn" id="addBtn">Add to Cart</button>
+      <button class="btn" id="downloadBtn">Download Cart as JPG</button>
+    </div>
+
+    <div class="cart-container">
       <table id="cartTable">
-        <thead><tr><th>Item</th><th>Weight</th><th>Price/Kg</th><th>Price</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Weight (Kg)</th>
+            <th>Price/Kg (₹)</th>
+            <th>Price (₹)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody></tbody>
       </table>
-      <div class="cart-total" id="totalPrice">Total: ₹0.00</div>
     </div>
+    <div class="total" id="totalPrice">Total: ₹0.00</div>
   </div>
 
   <script>
-    const itemNameInput = document.getElementById("itemName");
-    const pricePerKgInput = document.getElementById("pricePerKg");
-    const weightSelect = document.getElementById("weightSelect");
-    const resultDiv = document.getElementById("result");
-    const unitPricesDiv = document.getElementById("unitPrices");
-    const cartTableBody = document.querySelector("#cartTable tbody");
-    const totalPriceDiv = document.getElementById("totalPrice");
-    const addBtn = document.getElementById("addBtn");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const cartContainer = document.getElementById("cartContainer");
+    const itemName = document.getElementById('itemName'),
+          pricePerKg = document.getElementById('pricePerKg'),
+          weightSelect = document.getElementById('weightSelect'),
+          priceInfo = document.getElementById('priceInfo'),
+          addBtn = document.getElementById('addBtn'),
+          downloadBtn = document.getElementById('downloadBtn'),
+          cartTable = document.getElementById('cartTable').querySelector('tbody'),
+          totalPriceEl = document.getElementById('totalPrice');
 
-    let totalPrice = 0;
-    let editIndex = -1;
+    let total=0, editIndex=-1;
 
-    function calculatePrice() {
-      const itemName = itemNameInput.value.trim();
-      const pricePerKg = parseFloat(pricePerKgInput.value);
-      const selectedWeight = parseFloat(weightSelect.value);
-      if (!itemName || isNaN(pricePerKg) || isNaN(selectedWeight)) {
-        resultDiv.textContent = "❗ Complete all fields";
-        unitPricesDiv.textContent = "";
+    function updatePriceInfo() {
+      const name = itemName.value.trim();
+      const ppk = parseFloat(pricePerKg.value);
+      const wt = parseFloat(weightSelect.value);
+
+      if(!name|| isNaN(ppk)|| isNaN(wt)){
+        priceInfo.innerHTML = '💡 Enter details to see price breakdown';
         return;
       }
-      const price = (pricePerKg * selectedWeight).toFixed(2);
-      const perGram = (pricePerKg / 1000).toFixed(2);
-      const per100g = (pricePerKg / 10).toFixed(2);
-      resultDiv.textContent = `📦 Price for ${selectedWeight} Kg ${itemName} is ₹${price}`;
-      unitPricesDiv.innerHTML = `💰 ₹${perGram}/g | ₹${per100g}/100g`;
+      const price = (ppk*wt).toFixed(2),
+            gram = (ppk/1000).toFixed(2),
+            hg = (ppk/10).toFixed(2);
+      priceInfo.innerHTML = `
+        <span>📦 Price for <strong>${wt}Kg ${name}</strong>: ₹${price}</span>
+        <span>💰 ₹${gram}/g | ₹${hg}/100g | <em>(₹${ppk}/Kg)</em></span>
+      `;
     }
 
-    function refreshTotal() {
-      totalPrice = Array.from(cartTableBody.rows)
-        .reduce((sum, row) => sum + parseFloat(row.cells[3].textContent.replace('₹','')), 0);
-      totalPriceDiv.textContent = `Total: ₹${totalPrice.toFixed(2)}`;
+    function calculateTotal(){
+      total = Array.from(cartTable.rows)
+        .reduce((sum,row) => sum + parseFloat(row.cells[3].textContent),0);
+      totalPriceEl.textContent = `Total: ₹${total.toFixed(2)}`;
     }
 
-    function clearInputs() {
-      itemNameInput.value = "";
-      pricePerKgInput.value = "";
-      weightSelect.value = "";
-      resultDiv.textContent = "💡 Enter details to see price";
-      unitPricesDiv.textContent = "";
+    function resetInputs(){
+      itemName.value=pricePerKg.value=weightSelect.value='';
+      updatePriceInfo();
+      addBtn.textContent='Add to Cart';
+      editIndex=-1;
     }
 
-    addBtn.addEventListener("click", () => {
-      const itemName = itemNameInput.value.trim();
-      const pricePerKg = parseFloat(pricePerKgInput.value);
-      const selectedWeight = parseFloat(weightSelect.value);
-      if (!itemName || isNaN(pricePerKg) || isNaN(selectedWeight)) {
-        alert("❗ Complete all fields before adding");
+    addBtn.onclick = () => {
+      const name = itemName.value.trim(),
+            ppk = parseFloat(pricePerKg.value),
+            wt = parseFloat(weightSelect.value);
+
+      if(!name|| isNaN(ppk)|| isNaN(wt)){
+        alert('❗ Please complete all fields');
         return;
       }
 
-      const price = (pricePerKg * selectedWeight).toFixed(2);
-      if (editIndex > -1) {
-        const row = cartTableBody.rows[editIndex];
-        row.cells[0].textContent = itemName;
-        row.cells[1].textContent = selectedWeight + ' Kg';
-        row.cells[2].textContent = '₹' + pricePerKg.toFixed(2);
-        row.cells[3].textContent = '₹' + price;
-        editIndex = -1;
-        addBtn.textContent = "Add to Cart ➕";
+      const price = (ppk*wt).toFixed(2);
+
+      if(editIndex>-1){
+        const row=cartTable.rows[editIndex];
+        row.cells[0].innerText=name;
+        row.cells[1].innerText=wt;
+        row.cells[2].innerText=ppk.toFixed(2);
+        row.cells[3].innerText=price;
+        editIndex=-1;
       } else {
-        const row = cartTableBody.insertRow();
-        row.innerHTML = `
-          <td>${itemName}</td>
-          <td>${selectedWeight} Kg</td>
-          <td>₹${pricePerKg.toFixed(2)}</td>
-          <td>₹${price}</td>
-          <td>
-            <button class="small-btn edit-btn">Edit</button>
-            <button class="small-btn remove-btn">Remove</button>
+        const row=cartTable.insertRow();
+        row.innerHTML=`
+          <td>${name}</td>
+          <td>${wt}</td>
+          <td>${ppk.toFixed(2)}</td>
+          <td>${price}</td>
+          <td class="actions">
+            <button class="btn-action edit">Edit</button>
+            <button class="btn-action remove">Remove</button>
           </td>`;
-        row.querySelector(".edit-btn").onclick = () => {
-          editIndex = row.rowIndex - 1;
-          itemNameInput.value = row.cells[0].textContent;
-          pricePerKgInput.value = row.cells[2].textContent.replace('₹','');
-          weightSelect.value = parseFloat(row.cells[1].textContent);
-          calculatePrice();
-          addBtn.textContent = "Update Item ✏️";
+        row.querySelector('.edit').onclick = () => {
+          editIndex = row.rowIndex-1;
+          itemName.value = row.cells[0].innerText;
+          pricePerKg.value = row.cells[2].innerText;
+          weightSelect.value = row.cells[1].innerText;
+          updatePriceInfo();
+          addBtn.textContent = 'Update Item';
         };
-        row.querySelector(".remove-btn").onclick = () => {
-          cartTableBody.deleteRow(row.rowIndex - 1);
-          refreshTotal();
+        row.querySelector('.remove').onclick = () => {
+          row.remove();
+          calculateTotal();
         };
       }
 
-      refreshTotal();
-      clearInputs();
-    });
+      calculateTotal();
+      resetInputs();
+    };
 
-    itemNameInput.addEventListener("input", calculatePrice);
-    pricePerKgInput.addEventListener("input", calculatePrice);
-    weightSelect.addEventListener("change", calculatePrice);
+    [itemName, pricePerKg, weightSelect].forEach(el =>
+      el.addEventListener('input', updatePriceInfo)
+    );
 
-    downloadBtn.addEventListener("click", () => {
-      html2canvas(cartContainer).then(canvas => {
-        const link = document.createElement("a");
-        link.download = "cart.png";
+    downloadBtn.onclick = () => {
+      html2canvas(document.querySelector('.container')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'cart.png';
         link.href = canvas.toDataURL();
         link.click();
       });
-    });
+    };
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(() => console.log("✅ Service Worker Registered"))
-          .catch(err => console.error("❌ Service Worker Error", err));
-      });
-    }
+    updatePriceInfo();
   </script>
 </body>
 </html>
