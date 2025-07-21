@@ -19,9 +19,7 @@
       --highlight: #91c7b1;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -38,12 +36,10 @@
       padding: 24px;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
     }
 
     h2 {
       text-align: center;
-      margin-top: 0;
       color: var(--primary);
       font-weight: 500;
     }
@@ -95,16 +91,20 @@
       color: var(--highlight);
     }
 
+    .cart {
+      margin-top: 30px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 10px;
       overflow-x: auto;
       display: block;
       font-size: 0.95rem;
     }
 
-    table thead {
+    thead {
       background-color: var(--bg);
     }
 
@@ -112,7 +112,7 @@
       padding: 10px;
       border: 1px solid var(--border);
       text-align: center;
-      min-width: 80px;
+      min-width: 90px;
     }
 
     .actions button {
@@ -154,10 +154,9 @@
     }
   </style>
 </head>
-
 <body>
   <div class="container">
-    <h2>🧮 Price Calculator</h2>
+    <h2>Price Calculator 🧮</h2>
 
     <label for="itemName">Item Name</label>
     <input type="text" id="itemName" placeholder="e.g. Sugar" />
@@ -179,7 +178,7 @@
     <div id="unitPrices"></div>
 
     <button id="addBtn">Add to Cart ➕</button>
-    <button id="downloadBtn" class="download-btn">Download Cart as JPG 📸</button>
+    <button id="downloadBtn" class="download-btn">Download Cart 📸</button>
 
     <div class="cart" id="cartContainer">
       <h3>🛒 Cart</h3>
@@ -189,6 +188,7 @@
         </thead>
         <tbody></tbody>
       </table>
+      <div class="cart-total" id="totalWeight">Total Weight: 0.00 Kg</div>
       <div class="cart-total" id="totalPrice">Total: ₹0.00</div>
     </div>
   </div>
@@ -201,6 +201,7 @@
     const unitPricesDiv = document.getElementById("unitPrices");
     const cartTableBody = document.querySelector("#cartTable tbody");
     const totalPriceDiv = document.getElementById("totalPrice");
+    const totalWeightDiv = document.getElementById("totalWeight");
     const addBtn = document.getElementById("addBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const cartContainer = document.getElementById("cartContainer");
@@ -225,9 +226,17 @@
     }
 
     function refreshTotal() {
-      totalPrice = Array.from(cartTableBody.rows)
-        .reduce((sum, row) => sum + parseFloat(row.cells[3].textContent.replace('₹','')), 0);
-      totalPriceDiv.textContent = `Total: ₹${totalPrice.toFixed(2)}`;
+      let total = 0;
+      let totalWeight = 0;
+      Array.from(cartTableBody.rows).forEach(row => {
+        const price = parseFloat(row.cells[3].textContent.replace('₹',''));
+        const weight = parseFloat(row.cells[1].textContent.replace(' Kg',''));
+        total += price;
+        totalWeight += weight;
+      });
+
+      totalPriceDiv.textContent = `Total: ₹${total.toFixed(2)}`;
+      totalWeightDiv.textContent = `Total Weight: ${totalWeight.toFixed(2)} Kg`;
     }
 
     function clearInputs() {
